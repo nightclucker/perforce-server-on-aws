@@ -10,6 +10,7 @@ provider "aws" {
 # key pair
 # backups
 
+# Using the existing instance to determine how the p4 instance should be configured.
 # import {
 #   to = aws_instance.p4_instance
 #   id = "i-06b2c2ace81412274"
@@ -42,26 +43,12 @@ resource "aws_instance" "p4_instance" {
     Environment = "dev"
     Service     = "P4"
   }
-  tags_all = {
-    Name        = "p4-helix-core-dev"
-    project     = "JustInOps"
-    component   = "perforce"
-    Owner       = "Hair"
-    Environment = "dev"
-    Service     = "P4"
-  }
-
-  # vpc
-  # security Group
-  # ebs block devices - New
-  # ebs block devices - from existing?
 
   # depots volume
   ebs_block_device {
     delete_on_termination = false
     device_name           = "/dev/sdf"
     encrypted             = true
-    kms_key_id            = "arn:aws:kms:us-east-1:230572723352:key/fb5ded94-86ca-4f23-bc59-e6b9f81bdf0d"
     tags = {
       "Backup"      = "true"
       "Environment" = "dev"
@@ -71,15 +58,7 @@ resource "aws_instance" "p4_instance" {
       "component"   = "perforce"
       "project"     = "JustInOps"
     }
-    tags_all = {
-      "Backup"      = "true"
-      "Environment" = "dev"
-      "Name"        = "p4-dev-hxdepots-p4"
-      "Owner"       = "Hair"
-      "Service"     = "P4"
-      "component"   = "perforce"
-      "project"     = "JustInOps"
-    }
+
     throughput  = 0
     volume_size = 128
     volume_type = "st1"
@@ -91,7 +70,6 @@ resource "aws_instance" "p4_instance" {
     device_name           = "/dev/sdg"
     encrypted             = true
     iops                  = 3000
-    kms_key_id            = "arn:aws:kms:us-east-1:230572723352:key/fb5ded94-86ca-4f23-bc59-e6b9f81bdf0d"
     tags = {
       "Backup"      = "true"
       "Environment" = "dev"
@@ -113,7 +91,6 @@ resource "aws_instance" "p4_instance" {
     device_name           = "/dev/sdh"
     encrypted             = true
     iops                  = 3000
-    kms_key_id            = "arn:aws:kms:us-east-1:230572723352:key/fb5ded94-86ca-4f23-bc59-e6b9f81bdf0d"
     tags = {
       "Environment" = "dev"
       "Name"        = "p4-dev-hxmetadata-p4"
@@ -137,7 +114,6 @@ resource "aws_instance" "p4_instance" {
     tags                  = {}
     tags_all              = {}
     throughput            = 0
-    volume_id             = "vol-0fc6b3e5a3b7264e4"
     volume_size           = 20
     volume_type           = "gp2"
   }
