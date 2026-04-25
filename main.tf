@@ -2,20 +2,11 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Create a VPC?
-# Create a Security Group?
-# Create an EC2 instance using Perforce-Helix-Core ami, ami-00635fb441a02b7fd, Perforce-Helix-Core-SDP-AMI-Base 2025.2.1 20260114 114159-a4bd0546-27f6-4fda-bd99-980db4b2792a
-# create volumes
-# Add tags to everything
-# key pair
-# backups
-
-# Using the existing instance to determine how the p4 instance should be configured.
+# # Using the existing instance to determine how the p4 instance should be configured.
 # import {
 #   to = aws_instance.p4_instance
 #   id = "i-06b2c2ace81412274"
 # }
-
 
 data "aws_ami" "sdp_ami_base" {
   most_recent = true
@@ -25,6 +16,20 @@ data "aws_ami" "sdp_ami_base" {
     name   = "name"
     values = ["Perforce-Helix-Core-SDP-AMI-Base 202*"]
   }
+}
+
+module "vpc" {
+  source     = "./modules/vpc"
+  cidr_block = "10.0.0.0/16"
+}
+
+module "security_group" {
+  source            = "./modules/security_group"
+  vpc_id            = module.vpc.vpc_id
+  p4_port           = 1666
+  ssh_port          = 22
+  allowed_ssh_cidrs = ["0.0.0.0/0"]
+  allowed_p4_cidrs  = ["0.0.0.0/0"]
 }
 
 resource "aws_instance" "p4_instance" {
@@ -105,33 +110,22 @@ resource "aws_instance" "p4_instance" {
     volume_type = "gp3"
   }
 
-  ebs_block_device {
-    delete_on_termination = true
-    device_name           = "/dev/sda1"
-    encrypted             = false
-    iops                  = 100
-    snapshot_id           = "snap-014de5d2c596505ee"
-    tags                  = {}
-    tags_all              = {}
-    throughput            = 0
-    volume_size           = 20
-    volume_type           = "gp2"
-  }
+  # I am not sure if I need this, but I will add it later if I do. For now, just a placeholder.
+  # ebs_block_device {
+  #   delete_on_termination = true
+  #   device_name           = "/dev/sda1"
+  #   encrypted             = false
+  #   iops                  = 100
+  #   # Snapshot from P4
+  #   snapshot_id           = "snap-014de5d2c596505ee"
+  #   tags                  = {}
+  #   throughput            = 0
+  #   volume_size           = 20
+  #   volume_type           = "gp2"
+  # }
 
-  root_block_device {
-    delete_on_termination = true
-    encrypted             = false
-    iops                  = 3000
-    tags                  = {}
-    tags_all              = {}
-    throughput            = 125
-    volume_size           = 30
-    volume_type           = "gp3"
-  }
 
-  vpc_security_group_ids = [
-    "sg-0024d17ba26256eb7",
-  ]
+  vpc_security_group_ids = [module.security_group.security_group_id]
 
   # script that runs to setup P4. 
   # I will add the script later, for now just a placeholder
