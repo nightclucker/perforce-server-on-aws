@@ -29,7 +29,13 @@ variable "allowed_ssh_cidrs" {
   type    = list(string)
 }
 
+variable "allowed_egress_cidrs" {
+  description = "List of CIDRs allowed for egress. Use your public IP e.g. 1.2.3.4/32"
+  type    = list(string)
+  default = ["0.0.0.0/0"]
+}
+
 variable "vpc_id" {
+  description = "The VPC ID to attach the security group to."
   type        = string
-  description = "The VPC ID to attach the security group to"
 }

@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
 }
 
 # # Using the existing instance to determine how the p4 instance should be configured.
@@ -10,35 +10,36 @@ provider "aws" {
 
 data "aws_ami" "sdp_ami_base" {
   most_recent = true
-  owners      = ["aws-marketplace"]
+  owners      = var.ami_owners
 
   filter {
     name   = "name"
-    values = ["Perforce-Helix-Core-SDP-AMI-Base 202*"]
+    values = var.ami_filters
   }
 }
 
 module "vpc" {
   source     = "./modules/vpc"
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.vpc_cidr_block
 }
 
 module "security_group" {
-  source            = "./modules/security_group"
-  vpc_id            = module.vpc.vpc_id
-  p4_port           = 1666
-  ssh_port          = 22
-  allowed_ssh_cidrs = ["0.0.0.0/0"]
-  allowed_p4_cidrs  = ["0.0.0.0/0"]
+  source               = "./modules/security_group"
+  vpc_id               = module.vpc.vpc_id
+  p4_port              = var.p4_port
+  ssh_port             = var.ssh_port
+  allowed_p4_cidrs     = var.allowed_p4_cidrs
+  allowed_ssh_cidrs    = var.allowed_ssh_cidrs
+  allowed_egress_cidrs = var.allowed_egress_cidrs
 }
 
 resource "aws_instance" "p4_instance" {
   ami           = data.aws_ami.sdp_ami_base.id
-  instance_type = "t3.small"
+  instance_type = var.instance_type
 
   associate_public_ip_address = true
-  availability_zone           = "us-east-1c"
-  key_name                    = "perforceKey"
+  availability_zone           = var.availability_zone
+  key_name                    = var.instance_key
 
   tags = {
     Name        = "p4-helix-core-dev"
@@ -132,8 +133,4 @@ resource "aws_instance" "p4_instance" {
   user_data = null
 
 
-}
-
-output "ami_id_output" {
-  value = "AMI ID:  ${resource.aws_instance.p4_instance.ami}\nAMI Name: ${data.aws_ami.sdp_ami_base.name}"
 }

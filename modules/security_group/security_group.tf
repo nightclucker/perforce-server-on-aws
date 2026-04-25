@@ -7,8 +7,9 @@ resource "aws_security_group" "perforce_access" {
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
+  for_each          = toset(var.allowed_p4_cidrs)
   security_group_id = aws_security_group.perforce_access.id
-  cidr_ipv4         = aws_vpc.main.cidr_block
+  cidr_ipv4         = each.value
   from_port         = var.p4_port
   ip_protocol       = "tcp"
   to_port           = var.p4_port
