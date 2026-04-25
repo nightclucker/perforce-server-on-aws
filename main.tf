@@ -120,7 +120,6 @@ resource "aws_instance" "p4_instance" {
 
   root_block_device {
     delete_on_termination = true
-    device_name           = "/dev/sda2"
     encrypted             = false
     iops                  = 3000
     tags                  = {}
