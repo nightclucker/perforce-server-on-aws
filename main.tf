@@ -23,6 +23,7 @@ locals {
   depot_volume_name    = "p4-${var.environment}-hxdepots-p4"
   logs_volume_name     = "p4-${var.environment}-hxlogs-p4"
   metadata_volume_name = "p4-${var.environment}-hxmetadata-p4"
+  p4d_auth_id = "P4-${var.environment == "prod" ? "MAIN" : "SECONDARY"}-AWS"
 
   common_tags = {
     project     = var.project_name
@@ -101,7 +102,10 @@ resource "aws_instance" "p4_instance" {
 
   # script that runs to setup P4. 
   # I will add the script later, for now just a placeholder
-  user_data = null
+  user_data = templatefile("${path.module}/scripts/p4_userdata.sh", {
+    region      = var.region,
+    p4d_auth_id = local.p4d_auth_id
+  })
 
   tags = merge(local.common_tags, { Name = local.instance_name })
 
