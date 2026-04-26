@@ -30,6 +30,11 @@ locals {
 module "vpc" {
   source     = "./modules/vpc"
   cidr_block = var.vpc_cidr_block
+  environment = var.environment
+  availability_zone = var.availability_zone
+  project_name = var.project_name
+  tag_component = var.tag_component
+  tag_service = var.tag_service
 }
 
 module "security_group" {
@@ -46,6 +51,7 @@ module "security_group" {
 resource "aws_instance" "p4_instance" {
   ami           = data.aws_ami.sdp_ami_base.id
   instance_type = var.instance_type
+  subnet_id = module.vpc.subnet_ids
 
   associate_public_ip_address = true
   availability_zone           = var.availability_zone
