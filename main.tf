@@ -2,12 +2,6 @@ provider "aws" {
   region = var.region
 }
 
-# # Using the existing instance to determine how the p4 instance should be configured.
-# import {
-#   to = aws_instance.p4_instance
-#   id = "i-06b2c2ace81412274"
-# }
-
 data "aws_ami" "sdp_ami_base" {
   most_recent = true
   owners      = var.ami_owners
