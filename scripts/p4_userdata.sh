@@ -8,8 +8,6 @@ catch() {
   echo ""
   echo "Error code $1 occurred on line $2"
   echo ""
-  # Remove this - Only for cloudformation
-  cfn-signal --stack perforce-server --resource PerforceServerInstance --region us-east-1 --exit-code $1
   exit $1
 }
 
@@ -19,8 +17,7 @@ export RESTORED_FROM_SNAPSHOT=false
 export SWARM_IP=""
 export DEPOT_CONTENT_SNAPSHOT=""
 export AWS_REGION=$(curl --silent http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
-export SNS_ALERT_TOPIC_ARN=arn:aws:sns:us-east-1:230572723352:Perforce-Notifications-perforce-server
-export P4D_AUTH_ID=P4-MAIN-AWS
+export P4D_AUTH_ID=${p4d_auth_id}
 export CASE_SENSITIVITY=sensitive
 
 export DEPOT_DEVICE="/dev/sdf"
@@ -35,5 +32,5 @@ sudo -i -u perforce p4 configure set auth.id=$P4D_AUTH_ID
 rm -f /p4/1/.p4tickets
 sudo -i -u perforce p4login -v 1
 
-# Remove this - Only for cloudformation
-cfn-signal --stack perforce-server --resource PerforceServerInstance --region us-east-1
+# Publish success to SNS
+echo "P4 Server Bootstrap Completed Successfully!"
