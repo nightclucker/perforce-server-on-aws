@@ -3,6 +3,11 @@ variable "region" {
   default = "us-east-1"
 }
 
+variable "environment" {
+  type    = string
+  default = "dev"
+}
+
 variable "ami_owners" {
   type    = list(string)
   default = ["aws-marketplace"]
@@ -64,3 +69,17 @@ variable "instance_key" {
   default = "perforceKey"
 }
 
+variable "project_name" {
+  type = string
+  default = "JustInOps"
+}
+
+variable "tag_component" {
+  type = string
+  default = "perforce"
+}
+
+variable "tag_service" {
+  type = string
+  default = "P4"
+}
