@@ -125,4 +125,7 @@ resource "aws_instance" "p4_instance" {
 
   tags = merge(local.common_tags, { Name = local.instance_name })
 
+  lifecycle {
+    ignore_changes = [ami, user_data]
+  }
 }
