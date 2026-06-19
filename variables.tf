@@ -70,16 +70,16 @@ variable "instance_key" {
 }
 
 variable "project_name" {
-  type = string
+  type    = string
   default = "JustInOps"
 }
 
 variable "tag_component" {
-  type = string
+  type    = string
   default = "perforce"
 }
 
 variable "tag_service" {
-  type = string
+  type    = string
   default = "P4"
 }
