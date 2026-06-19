@@ -73,47 +73,6 @@ resource "aws_instance" "p4_instance" {
   availability_zone           = var.availability_zone
   key_name                    = var.instance_key
 
-  # depots volume
-  ebs_block_device {
-    delete_on_termination = false
-    device_name           = "/dev/sdf"
-    encrypted             = true
-    throughput            = 0
-    volume_size           = 128
-    volume_type           = "st1"
-    tags = merge(local.common_tags, {
-      "Backup" = "true"
-      "Name"   = local.depot_volume_name
-    })
-  }
-
-  # logs volume
-  ebs_block_device {
-    delete_on_termination = false
-    device_name           = "/dev/sdg"
-    encrypted             = true
-    iops                  = 3000
-    throughput            = 125
-    volume_size           = 16
-    volume_type           = "gp3"
-    tags = merge(local.common_tags, {
-      "Backup" = "true"
-      "Name"   = local.logs_volume_name
-    })
-  }
-
-  # metadata volume
-  ebs_block_device {
-    delete_on_termination = false
-    device_name           = "/dev/sdh"
-    encrypted             = true
-    iops                  = 3000
-    throughput            = 125
-    volume_size           = 16
-    volume_type           = "gp3"
-    tags                  = merge(local.common_tags, { "Name" = local.metadata_volume_name })
-  }
-
   vpc_security_group_ids = [module.security_group.security_group_id]
 
   # script that runs to setup P4. 
@@ -128,4 +87,59 @@ resource "aws_instance" "p4_instance" {
   lifecycle {
     ignore_changes = [ami, user_data]
   }
+}
+
+resource "aws_ebs_volume" "depots" {
+  availability_zone = var.availability_zone
+  size              = 128
+  type              = "st1"
+  encrypted         = true
+
+  tags = merge(local.common_tags, {
+    "Backup" = "true"
+    "Name"   = local.depot_volume_name
+  })
+}
+
+resource "aws_volume_attachment" "depots" {
+  device_name = "/dev/sdf"
+  volume_id   = aws_ebs_volume.depots.id
+  instance_id = aws_instance.p4_instance.id
+}
+
+resource "aws_ebs_volume" "logs" {
+  availability_zone = var.availability_zone
+  size              = 16
+  type              = "gp3"
+  iops              = 3000
+  throughput        = 125
+  encrypted         = true
+
+  tags = merge(local.common_tags, {
+    "Backup" = "true"
+    "Name"   = local.logs_volume_name
+  })
+}
+
+resource "aws_volume_attachment" "logs" {
+  device_name = "/dev/sdg"
+  volume_id   = aws_ebs_volume.logs.id
+  instance_id = aws_instance.p4_instance.id
+}
+
+resource "aws_ebs_volume" "metadata" {
+  availability_zone = var.availability_zone
+  size              = 16
+  type              = "gp3"
+  iops              = 3000
+  throughput        = 125
+  encrypted         = true
+
+  tags = merge(local.common_tags, { "Name" = local.metadata_volume_name })
+}
+
+resource "aws_volume_attachment" "metadata" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.metadata.id
+  instance_id = aws_instance.p4_instance.id
 }
